@@ -24,6 +24,7 @@ MCUGraves is a Paper/Spigot plugin that stores player inventory in graves on dea
 - If economy is enabled, the claim can cost money based on claim count.
 - Graves can expire if grave-expiry is enabled.
 - Optional grave compass points to a player's active grave.
+- Every grave is archived for its whole lifecycle (when grave-archive is enabled): a snapshot of its contents is saved the moment it is created, then its status is updated in place as it is claimed, expires, is recovered, or is evicted. This powers /grave browse (owner recovery of expired graves) and /grave logs (admin audit of all graves, with full contents).
 
 ## Commands
 ### Player Commands
@@ -32,14 +33,14 @@ MCUGraves is a Paper/Spigot plugin that stores player inventory in graves on dea
 - /grave cost (shows claim count and claim cost)
 - /grave list (lists active graves)
 - /grave tp (opens a GUI listing your active graves; click one to teleport there. Charges grave-tp.cost if enabled. No grave id to type.)
-- /grave browse (opens a GUI to recover your own expired graves for a fee)
+- /grave browse (opens a paginated 54-slot GUI to recover your own expired graves for a fee; only expired, not-yet-recovered graves appear. Bottom-row nav: Previous / Close / Next with a page indicator.)
 - /grave shop (opens grave shop; economy must be enabled)
 
 ### Admin Commands
 - /grave reload (reloads config and refreshes holograms)
 - /grave cleanup (removes orphan holograms)
 - /grave clear (removes all graves)
-- /grave logs (opens an audit GUI of every expired/archived grave: player heads → contents, death info, coords teleport, and recovery cost)
+- /grave logs (opens a paginated 54-slot audit GUI of EVERY grave at every stage — active, claimed by owner, expired (recovered or not), and evicted by the grave limit. Each head shows the status, death info, coords and recovery cost; clicking a head opens a detail view showing the grave's full contents — all inventory items, armor, and offhand — captured at the moment of death, regardless of status (active/claimed/expired/recovered/evicted), plus an info panel, a Back button and a teleport-to-coords button. Bottom-row nav: Previous / Close / Next with a page indicator. Records are kept for grave-archive.logs.retention-days days (default 14) after the grave ends, then purged; active graves are never purged.)
 
 ## Permissions
 ### Player Permissions
@@ -81,7 +82,7 @@ Key config.yml sections:
 - grave-expiry.enabled and grave-expiry.time-seconds: auto-expire graves
 - grave-block: the block type used for graves. Accepts ANY placeable Material, including functional/decorative blocks such as SKELETON_SKULL, WITHER_SKELETON_SKULL, ZOMBIE_HEAD, CREEPER_HEAD, PIGLIN_HEAD, DRAGON_HEAD. To use a player head, type `player-head` (a shortcut for PLAYER_HEAD that shows the grave owner's skin).
 - action-bar.enabled: show/hide the active-grave countdown action bar. When disabled, surface the same info via PlaceholderAPI instead (see Placeholders → PlaceholderAPI).
-- grave-archive.enabled / grave-archive.browse.* / grave-archive.logs.*: archive expired graves so /grave browse (owner recovery) and /grave logs (admin audit) can access them. Recovery price = base-cost × grave-archive.browse.price-multiplier. Times shown in Philippine time (Asia/Manila).
+- grave-archive.enabled / grave-archive.browse.* / grave-archive.logs.*: archive every grave (snapshot saved on creation) so /grave browse (owner recovery of expired graves) and /grave logs (admin audit of all graves, showing full contents at every status) can access them. Recovery price = base-cost × grave-archive.browse.price-multiplier. Times shown in Philippine time (Asia/Manila). grave-archive.logs.retention-days (default 14) sets how long a grave record is kept in /grave logs after the grave ends (is claimed/expired/evicted) before being auto-purged; active graves are never purged; set to 0 to keep records forever.
 - graves.max-graves and max-active-graves (legacy): limit active graves
 - grave-limit-behavior: DELETE_OLDEST or PREVENT_NEW
 - grave-protection.*: explosion protection and owner invulnerability
